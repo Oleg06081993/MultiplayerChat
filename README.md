@@ -1,4 +1,4 @@
-#Multiplayer chat (Java)
+# Multiplayer chat (Java)
 
 It's a simple desktop application, of course multithreading, written only on Java 8 without any frameworks. Project structure is built according to MVC pattern (Model-View-Controller).
 

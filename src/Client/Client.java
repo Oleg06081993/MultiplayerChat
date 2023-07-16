@@ -64,10 +64,10 @@ public class Client implements Runnable {
                         isLoginConfirmed = true;
                         isClient = true;
                         currentLogin = message.getUserName();
-                        clientGui.showClientInfoWindow("Сервер ответил, что LOGIN_AVAILABLE");
+                        clientGui.showClientInfoWindow(MessageType.LOGIN_AVAILABLE.getTextMessage());
                     }
                     if (message.getMessageType() == MessageType.LOGIN_UNAVAILABLE) {
-                        clientGui.showClientErrorWindow("Сервер ответил, что LOGIN_UNAVAILABLE");
+                        clientGui.showClientInfoWindow(MessageType.LOGIN_UNAVAILABLE.getTextMessage());
                     }
                 }
             } catch (Exception e) {
@@ -123,7 +123,6 @@ public class Client implements Runnable {
         @Override
         public void run() {
             while (isClient) {
-
                 try {
                     processIncomeMessage(connection.getInputMessage());
                 } catch (Exception e) {
@@ -134,6 +133,47 @@ public class Client implements Runnable {
         }
 
         private void processIncomeMessage(Message message) {
+            switch (message.getMessageType()) {
+                case TEXT -> {
+                    clientGui.updateChatArea(message.getUserName() + ": " + message.getText());
+                    break;
+                }
+                case UPDATE_USERLIST -> {
+                    clientService.refreshUserList(message.getListUsers());
+                    clientGui.updateUserArea(clientService.getLoginList());
+                    break;
+                }
+                case NEW_USER -> {
+                    if (message.getUserName().equals(currentLogin)) {
+                        clientGui.updateChatArea("Вы присоединились к чату под логином  " + currentLogin);
+                        break;
+                    }
+                    clientGui.updateChatArea(message.getText() + message.getUserName());
+                    clientService.refreshUserList(message.getListUsers());
+                    break;
+                }
+                case EXIT_USER -> {
+                    clientGui.updateChatArea("Пользователь " + message.getUserName() + " покинул чат");
+                    clientService.refreshUserList(message.getListUsers());
+                    break;
+                }
+                case INFO_FROM_SERVER -> {
+                    clientGui.updateChatArea("Сервисное сообщение: " + message.getText());
+                    break;
+                }
+                case CHANGE_LOGIN -> {
+                    if (message.getUserName().equals(currentLogin)) {
+                        clientGui.updateChatArea("Вы сменили логин на " + currentLogin);
+                        break;
+                    }
+                    clientGui.updateChatArea("Пользователь " + message.getText() + " сменил логин на " + message.getUserName());
+                    clientService.refreshUserList(message.getListUsers());
+                    break;
+                }
+            }
+        }
+
+        /*private void processIncomeMessage(Message message) {
 
             if(message.getMessageType() == MessageType.TEXT) {
                 clientGui.updateChatArea(message.getUserName() + ": " + message.getText());
@@ -165,7 +205,7 @@ public class Client implements Runnable {
                 clientGui.updateChatArea("Пользователь "+ message.getText() + " сменил логин на " + message.getUserName());
                 clientService.refreshUserList(message.getListUsers());
             }
-        }
+        }*/
     }
 }
 

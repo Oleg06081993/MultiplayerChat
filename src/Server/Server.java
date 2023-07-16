@@ -96,7 +96,7 @@ public class Server {
         }
 
         private void processConfirmMessages(Connection connection) throws IOException, ClassNotFoundException {
-            while (isNameAvailable == false) {
+            while (!isNameAvailable) {
                 Message message = connection.getInputMessage();
 
                 if (message.getMessageType() == MessageType.CONFIRM_CLIENT_NAME) {
